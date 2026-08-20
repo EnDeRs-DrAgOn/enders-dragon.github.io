@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image" href="yes.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16x16 Fairy Chess Rules Reference</title>
+    <style>
+
+/* --- DOCUMENTATION PIECE ICONS --- */
+
+.piece-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: 42px;
+}
+
+.docs-piece-icon {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    flex: 0 0 42px;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+}
+
+.piece-description {
+    flex: 1;
+    line-height: 1.6;
+}
+
+.piece-name {
+    display: block;
+    margin-bottom: 3px;
+}
+
+.site-title {
+    color: #ff00ff;
+    text-shadow: 0px 0px 15px rgba(255, 0, 255, 0.8);
+    margin: 10px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-decoration: none;
+    border: none;
+}
+
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #121212;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 10000;
+    border-bottom: 1px solid #2C2C2C;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.5);
+}
+
+
+.docs-navigation {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+
+    display: flex;
+    gap: 10px;
+
+    z-index: 9999;
+}
+
+.docs-navigation button {
+    width: 50px;
+    height: 50px;
+
+    padding-bottom: 10px;
+
+    background-color: #1A1A1A;
+    border-radius: 12px;
+    box-sizing: border-box;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px solid #2C2C2C;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+
+    cursor: pointer;
+
+    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.docs-navigation button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+    background-color: #2A2A2A;
+    border-color: #777777;
+}
+
+.docs-navigation button:active {
+    transform: translateY(2px) scale(0.95);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    background-color: #111111;
+}
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            padding: 80px 25px 25px 25px;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        h1 {
+            color: #88ff88;
+            border-bottom: 2px solid #333;
+            padding-bottom: 12px;
+            font-size: 24px;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 4px;
+        }
+
+        .section {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 3px solid #444;
+        }
+
+        li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* --- THEME DESIGN COLOR TIERS --- */
+        .tier-common { color: #ffffff; font-weight: bold; font-size: 15px; }
+        .tier-rare { color: #4caf50; font-weight: bold; font-size: 15px; }
+        .tier-epic { color: #00b0ff; font-weight: bold; font-size: 15px; }
+        .tier-legendary { color: #aa00ff; font-weight: bold; font-size: 15px; }
+        .tier-gold { color: #ffaa00; font-weight: bold; font-size: 15px; }
+        .tier-legacy { color: #bc8f8f; font-weight: bold; font-size: 15px; dashed-bottom: 1px solid #444; }
+
+        .heading-common { color: #ffffff; }
+        .heading-rare { color: #4caf50; }
+        .heading-epic { color: #00b0ff; }
+        .heading-legendary { color: #aa00ff; }
+        .heading-gold { color: #ffaa00; }
+        .heading-legacy { color: #bc8f8f; }
+
+        .highlight-text {
+            color: #ff5555;
+            font-weight: bold;
+        }
+
+        .diagram-container {
+            text-align: center;
+            margin: 15px 0;
+            background-color: #222;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .diagram-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        
+        .diagram-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <img src="yes.png" alt="Logo"
+         style="height: 40px; width: auto; margin-left: 10px;">
+
+    <h2 class="site-title">
+        16x16 Fairy Chess
+    </h2>
+</div>
+
+<div class="docs-navigation">
+    <button onclick="window.location.href='index.html'" title="Back">&lt;</button>
+    <button onclick="window.location.href='docs2.html'" title="Next">&gt;</button>
+</div>
+
+
+    <h1>16x16 Fairy Chess Reference Guide</h1>
+
+<div class="section">
+    <h2 class="heading-common">1. Common Tier (White Outlines)</h2>
+
+    <ul>
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_P.png"
+                     alt="Pawn"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-common piece-name">
+                        P — Standard Engine Pawn
+                    </strong>
+
+                    Your main infantry line. It moves forward up to
+                    3 squares on its first move, up to 2 squares on
+                    its second move, and 1 square forward per turn
+                    thereafter. Captures like a base game pawn.
+                    Can be en passanted on a 3-square move.
+                </div>
+            </div>
+        </li>
+
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_BP.png"
+                     alt="Berolina Pawn"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-common piece-name">
+                        BP — Berolina Pawn
+                    </strong>
+
+                    An inverted pawn. It moves diagonally forward up
+                    to 3 squares on its first move, up to 2 on its
+                    second, and 1 thereafter. It captures by stepping
+                    exactly 1 square straight forward.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_Af.png"
+                     alt="Alfil"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-common piece-name">
+                        Af — Alfil
+                    </strong>
+
+                    A classic fairy chess piece that leaps exactly
+                    2 squares diagonally, jumping over any
+                    intermediate piece.
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2 class="heading-rare">2. Rare Tier (Green Outlines)</h2>
+
+    <ul>
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_AP.png"
+                     alt="Arrow Pawn"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-rare piece-name">
+                        AP — Arrow Pawn
+                    </strong>
+
+                    A ranged pawn variant. It steps up to 3 squares
+                    forward initially and 2 thereafter. Instead of
+                    moving diagonally to capture, it shoots an enemy
+                    piece sitting 2 squares away diagonally, then
+                    moves 1 square diagonally forward to pick up
+                    the arrow.
+
+                    <!-- Your existing arrow pawn diagrams can stay here -->
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_Ba.png"
+                     alt="Baronet"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-rare piece-name">
+                        Ba — Baronet
+                    </strong>
+
+                    A localized power piece. It can leap like a
+                    Knight or slide exactly 1 square in any of the
+                    8 grid directions.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_Al.png"
+                     alt="Alibaba"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-rare piece-name">
+                        Al — Alibaba
+                    </strong>
+
+                    A compound leaper that can jump exactly
+                    2 squares diagonally (Alfil leap) or exactly
+                    2 squares orthogonally (Dabbaba leap).
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2 class="heading-epic">3. Epic Tier (Blue Outlines)</h2>
+
+    <ul>
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_Ch.png"
+                     alt="Chancellor"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-epic piece-name">
+                        Ch — Chancellor
+                    </strong>
+
+                    Combines the power of a Rook and a Knight.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_Ab.png"
+                     alt="Archbishop"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-epic piece-name">
+                        Ab — Archbishop
+                    </strong>
+
+                    Combines the power of a Bishop and a Knight.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_Ca.png"
+                     alt="Castle"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-epic piece-name">
+                        Ca — Castle
+                    </strong>
+
+                    Slides like a Rook, but can also slide exactly
+                    1 square diagonally.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_AfR.png"
+                     alt="Alfilrider"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-epic piece-name">
+                        AfR — Alfilrider
+                    </strong>
+
+                    The promoted version of the Alfil. It can slide
+                    any distance along diagonal paths, but only land
+                    on every second square.
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2 class="heading-legendary">4. Legendary Tier (Purple Outlines)</h2>
+
+    <ul>
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_E.png"
+                     alt="Elephant"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-legendary piece-name">
+                        E — Elephant
+                    </strong>
+
+                    Moves like a Rook, but can jump over any
+                    non-pawn pieces blocking its line of sight.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_Ex.png"
+                     alt="Executioner"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-legendary piece-name">
+                        Ex — Executioner
+                    </strong>
+
+                    Slides diagonally like a Bishop. When it lands
+                    adjacent to an enemy Amazon, it sacrifices itself
+                    to eliminate the Amazon and unlock the Amazonian
+                    for that player.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_ZN.png"
+                     alt="Zigzag Nightrider"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-legendary piece-name">
+                        ZN — Zigzag Nightrider
+                    </strong>
+
+                    A long-range leaper that chains Knight moves
+                    together in an alternating zigzag path.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_AlR.png"
+                     alt="Alibabarider"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-legendary piece-name">
+                        AlR — Alibabarider
+                    </strong>
+
+                    The promoted version of the Alibaba. It can
+                    travel indefinitely along orthogonal or diagonal
+                    tracks, skipping every other square.
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2 class="heading-gold">5. Divine Highest Tier (Gold Outlines)</h2>
+
+    <ul>
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_M.png"
+                     alt="Mortar"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-gold piece-name">
+                        M — Mortar
+                    </strong>
+
+                    A stationary artillery piece with a
+                    diamond-shaped shell range.
+
+                    It moves and captures normally like a King,
+                    one square in any direction. Instead of moving,
+                    however, it can fire a shell at an enemy piece
+                    anywhere within a Manhattan distance of 4.
+
+                    Shells may pass over friendly pieces, but cannot
+                    pass through enemy pieces. Firing a shell does
+                    not move the Mortar.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_K.png"
+                     alt="King"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-gold piece-name">
+                        K — King
+                    </strong>
+
+                    The crown piece. Moves 1 square in any direction.
+                    Its preservation determines the win or loss state
+                    of the match.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_A.png"
+                     alt="Amazon"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-gold piece-name">
+                        A — Amazon
+                    </strong>
+
+                    A powerful compound piece combining the movement
+                    profiles of the Queen and Knight, with its special
+                    jumping mechanics.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_R.png"
+                     alt="Rose"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-gold piece-name">
+                        R — Rose
+                    </strong>
+
+                    Moves along a circular path of Knight leaps,
+                    allowing multiple consecutive 2×1 curves in a
+                    single turn when unobstructed.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_Am.png"
+                     alt="Amazonian"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-gold piece-name">
+                        Am — Amazonian
+                    </strong>
+
+                    A locked endgame piece unlocked through an
+                    Executioner sacrifice. It combines Queen,
+                    Knight, and Rose movement.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_J.png"
+                     alt="Jester"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-gold piece-name">
+                        J — Jester
+                    </strong>
+
+                    A mimic piece with no fixed movement profile.
+                    It copies the movement rules of the piece moved
+                    by the opponent on the previous turn. If no piece
+                    has moved yet, it falls back to King movement.
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2 class="heading-legacy">6. Legacy Class Tier (Rose Brown Outlines)</h2>
+
+    <ul>
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_0Q.png"
+                     alt="Original Queen"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-legacy piece-name">
+                        0Q — Original Queen
+                    </strong>
+
+                    Moves any number of squares in any direction.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_0R.png"
+                     alt="Original Rook"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-legacy piece-name">
+                        0R — Original Rook
+                    </strong>
+
+                    Moves any number of squares orthogonally.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_0B.png"
+                     alt="Original Bishop"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-legacy piece-name">
+                        0B — Original Bishop
+                    </strong>
+
+                    Moves any number of squares diagonally.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_0N.png"
+                     alt="Original Knight"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-legacy piece-name">
+                        0N — Original Knight
+                    </strong>
+
+                    Leaps in the standard 2×1 Knight pattern and
+                    can jump over other pieces.
+                </div>
+            </div>
+        </li>
+
+        <li>
+            <div class="piece-entry">
+                <img src="pieces/W_0P.png"
+                     alt="Original Pawn"
+                     class="docs-piece-icon">
+
+                <div class="piece-description">
+                    <strong class="tier-legacy piece-name">
+                        0P — Original Pawn
+                    </strong>
+
+                    Follows standard chess pawn movement, including
+                    its initial two-square move, diagonal captures,
+                    and en passant.
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>

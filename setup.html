@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Board - MY 16x16 Fairy Chess</title>
+    <link rel="icon" type="image" href="yes.png">
+
+    <style>
+
+        #piece-dropdown {
+    display: none;
+    width: 100%;
+    max-height: 320px;
+    overflow-y: auto;
+
+    /* Hide scrollbar but keep scrolling */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    position: absolute;
+    top: 48px;
+    left: 0;
+
+    background-color: #1A1A1A;
+    border: 1px solid #2C2C2C;
+    z-index: 5000;
+
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+#piece-dropdown::-webkit-scrollbar {
+    display: none;
+}
+        * {
+            box-sizing: border-box;
+        }
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #121212;
+    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding-top: 80px;
+    padding-bottom: 50px;
+    user-select: none;
+}
+
+        /* =========================
+           TOP BAR
+        ========================= */
+
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #121212;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            z-index: 10000;
+            border-bottom: 1px solid #2C2C2C;
+        }
+
+        .top-bar img {
+            height: 40px;
+            width: auto;
+            margin-left: 10px;
+        }
+
+        .top-bar h2 {
+            color: #ff00ff;
+            text-shadow: 0px 0px 15px rgba(255, 0, 255, 0.8);
+            margin: 10px;
+        }
+
+        /* =========================
+           BOARD
+        ========================= */
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(16, 45px);
+            grid-template-rows: repeat(16, 45px);
+            position: relative;
+            outline: none;
+            border: 0;
+            box-shadow: 0px 0px 20000px rgba(255, 0, 255, 0.2);
+        }
+
+        .square {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .light {
+            background-color: #eeeeee;
+        }
+
+        .dark {
+            background-color: #555555;
+        }
+
+        .square img {
+            width: 95%;
+            height: 95%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        /* =========================
+           COORDINATES
+        ========================= */
+
+        .coord-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .coord-number {
+            left: 2px;
+            top: 1px;
+            color: #222222;
+        }
+
+        .coord-letter {
+            right: 2px;
+            bottom: 0px;
+            color: #222222;
+        }
+
+        /* =========================
+           PIECE SELECTOR
+        ========================= */
+
+        .selector-container {
+            width: 728px;
+            margin: 20px auto 0 auto;
+            position: relative;
+        }
+
+        .selector-header {
+            width: 100%;
+            height: 48px;
+            background-color: #1A1A1A;
+            border: 1px solid #2C2C2C;
+            box-shadow: 0px 0px 20px rgba(255, 0, 255, 0.2);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 15px;
+            cursor: pointer;
+        }
+
+        .selector-header:hover {
+            border-color: #444444;
+        }
+
+        #selected-piece-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #88ff88;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        #selected-piece-display img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+        .dropdown-arrow {
+            color: #ff00ff;
+            font-size: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        .dropdown-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        #piece-dropdown {
+            display: none;
+            width: 100%;
+            max-height: 320px;
+            overflow-y: auto;
+
+            position: absolute;
+            top: 48px;
+            left: 0;
+
+            background-color: #1A1A1A;
+            border: 1px solid #2C2C2C;
+            z-index: 5000;
+
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        #piece-dropdown.open {
+            display: block;
+        }
+
+        .piece-option {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #252525;
+        }
+
+        .piece-option:hover {
+            background-color: #292929;
+                outline: 1px solid #ff00ff;
+    outline-offset: -1px;
+        }
+        .piece-option.keyboard-highlight {
+    background-color: #292929;
+    outline: 1px solid #ff00ff;
+    outline-offset: -1px;
+}
+
+        .piece-option img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+        }
+
+        .piece-option span {
+            color: #88ff88;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+        }
+        /* =========================
+   PIECE HOVER TOOLTIP
+========================= */
+
+.piece-option {
+    position: relative;
+}
+
+.piece-option::after {
+    content: attr(data-piece-name);
+
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+
+    margin-left: 10px;
+
+    background-color: #1A1A1A;
+    color: #88ff88;
+
+    border: 1px solid #2C2C2C;
+    padding: 6px 10px;
+
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+
+    white-space: nowrap;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity 0.15s ease;
+
+    z-index: 10000;
+}
+
+.piece-option:hover::after {
+    opacity: 1;
+}
+
+        /* =========================
+           CONTROLS
+        ========================= */
+
+        .controls {
+            width: 728px;
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .control-button {
+            flex: 1;
+            height: 42px;
+
+            background-color: #1A1A1A;
+            color: #88ff88;
+
+            border: 1px solid #2C2C2C;
+            border-radius: 0;
+
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            box-shadow: 0px 0px 15px rgba(255, 0, 255, 0.15);
+        }
+
+        .control-button:hover {
+            border-color: #555555;
+            background-color: #222222;
+        }
+
+        .control-button:active {
+            background-color: #2C2C2C;
+        }
+
+        /* =========================
+           FEN BOX
+        ========================= */
+
+        .fen-container {
+            width: 728px;
+            margin: 12px auto 0 auto;
+        }
+
+        #fen-textbox {
+            width: 100%;
+            height: 52px;
+
+            padding: 10px 15px;
+
+            background-color: #1A1A1A;
+            color: #88ff88;
+
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+
+            border: 1px solid #2C2C2C;
+            border-radius: 0;
+
+            outline: none;
+
+            box-shadow: 0px 0px 20px rgba(255, 0, 255, 0.2);
+
+            text-align: center;
+        }
+
+        #fen-textbox:focus {
+            border-color: #444444;
+            box-shadow: 0px 0px 25px rgba(255, 0, 255, 0.35);
+        }
+
+        /* =========================
+           COPY FEN
+        ========================= */
+
+#fen-controls {
+    width: 728px;
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+#copy-fen,
+#move-side-toggle {
+    flex: 1;
+    height: 38px;
+
+    background-color: #1A1A1A;
+    color: #88ff88;
+
+    border: 1px solid #2C2C2C;
+
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0px 0px 15px rgba(255, 0, 255, 0.15);
+}
+
+#copy-fen:hover,
+#move-side-toggle:hover {
+    background-color: #222222;
+    border-color: #555555;
+}
+
+#copy-fen:active,
+#move-side-toggle:active {
+    background-color: #2C2C2C;
+}
+
+        /* =========================
+           NAVIGATION ARROWS
+        ========================= */
+
+/* =========================
+   DOCUMENT NAVIGATION
+========================= */
+
+.docs-navigation {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+
+    display: flex;
+    gap: 10px;
+
+    z-index: 9999;
+}
+
+.docs-navigation button {
+    width: 50px;
+    height: 50px;
+
+    padding-bottom: 10px;
+
+    background-color: #1A1A1A;
+    border-radius: 12px;
+    box-sizing: border-box;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px solid #2C2C2C;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+
+    cursor: pointer;
+
+    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.docs-navigation button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+    background-color: #2A2A2A;
+    border-color: #777777;
+}
+
+.docs-navigation button:active {
+    transform: translateY(2px) scale(0.95);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    background-color: #111111;
+}
+    </style>
+</head>
+
+<body>
+
+<!-- =========================
+     TOP BAR
+========================= -->
+
+<div class="top-bar">
+    <img src="yes.png" alt="Logo">
+
+    <h2>
+        16x16 Fairy Chess
+    </h2>
+</div>
+
+
+<!-- =========================
+     BOARD
+========================= -->
+
+<div id="board"></div>
+
+
+<!-- =========================
+     PIECE SELECTOR
+========================= -->
+
+<div class="selector-container">
+
+    <div class="selector-header" id="selector-header">
+
+        <div id="selected-piece-display">
+            <span>No piece selected</span>
+        </div>
+
+        <div class="dropdown-arrow" id="dropdown-arrow">
+            ▼
+        </div>
+
+    </div>
+
+
+    <div id="piece-dropdown"></div>
+
+</div>
+
+
+<!-- =========================
+     BOARD CONTROLS
+========================= -->
+
+<div class="controls">
+
+    <button class="control-button" id="reset-board">
+        RESET BOARD
+    </button>
+
+    <button class="control-button" id="clear-board">
+        CLEAR BOARD
+    </button>
+
+</div>
+
+
+<!-- =========================
+     FEN
+========================= -->
+
+<div class="fen-container">
+
+    <input
+        type="text"
+        id="fen-textbox"
+        readonly
+        placeholder="FEN position will appear here..."
+    >
+
+</div>
+
+<div id="fen-controls">
+
+    <button id="copy-fen">
+        COPY FEN
+    </button>
+
+    <button id="move-side-toggle">
+        WHITE MOVES
+    </button>
+
+</div>
+
+
+<!-- =========================
+     NAVIGATION
+========================= -->
+
+<div class="docs-navigation">
+    <button
+        onclick="window.location.href='docs2.html'"
+        title="Previous">
+        &lt;
+    </button>
+
+    <button
+        onclick="window.location.href='index.html'"
+        title="Home">
+        &gt;
+    </button>
+</div>
+
+
+<script>
+
+/* =========================================================
+   SETUP BOARD SYSTEM
+========================================================= */
+
+const boardSize = 16;
+
+let setupBoard = [];
+
+let selectedPiece = null;
+let activeSide = 'w';
+
+
+/* =========================================================
+   PIECE DEFINITIONS
+========================================================= */
+
+const pieces = [
+
+    {
+        type: 'K',
+        name: 'King',
+        white: 'pieces/W_K.png',
+        black: 'pieces/B_K.png'
+    },
+
+    {
+        type: 'A',
+        name: 'Amazon',
+        white: 'pieces/W_A.png',
+        black: 'pieces/B_A.png'
+    },
+
+    {
+        type: 'AfR',
+        name: 'Alfilrider',
+        white: 'pieces/W_AfR.png',
+        black: 'pieces/B_AfR.png'
+    },
+
+    {
+        type: 'Af',
+        name: 'Alfil',
+        white: 'pieces/W_Af.png',
+        black: 'pieces/B_Af.png'
+    },
+
+    {
+        type: 'Al',
+        name: 'Alibaba',
+        white: 'pieces/W_Al.png',
+        black: 'pieces/B_Al.png'
+    },
+
+    {
+        type: 'AlR',
+        name: 'Alibabarider',
+        white: 'pieces/W_AlR.png',
+        black: 'pieces/B_AlR.png'
+    },
+
+    {
+        type: 'Am',
+        name: 'Amazonian',
+        white: 'pieces/W_Am.png',
+        black: 'pieces/B_Am.png'
+    },
+
+    {
+        type: 'J',
+        name: 'Jester',
+        white: 'pieces/W_J.png',
+        black: 'pieces/B_J.png'
+    },
+
+    {
+        type: 'R',
+        name: 'Rose',
+        white: 'pieces/W_R.png',
+        black: 'pieces/B_R.png'
+    },
+
+    {
+        type: 'ZN',
+        name: 'Zigzag Nightrider',
+        white: 'pieces/W_ZN.png',
+        black: 'pieces/B_ZN.png'
+    },
+
+    {
+        type: 'Ch',
+        name: 'Chancellor',
+        white: 'pieces/W_Ch.png',
+        black: 'pieces/B_Ch.png'
+    },
+
+    {
+        type: 'Ab',
+        name: 'Archbishop',
+        white: 'pieces/W_Ab.png',
+        black: 'pieces/B_Ab.png'
+    },
+
+    {
+        type: 'Ba',
+        name: 'Baronet',
+        white: 'pieces/W_Ba.png',
+        black: 'pieces/B_Ba.png'
+    },
+
+    {
+        type: 'Ca',
+        name: 'Castle',
+        white: 'pieces/W_Ca.png',
+        black: 'pieces/B_Ca.png'
+    },
+
+    {
+        type: 'E',
+        name: 'Elephant',
+        white: 'pieces/W_E.png',
+        black: 'pieces/B_E.png'
+    },
+
+    {
+        type: 'Ex',
+        name: 'Executioner',
+        white: 'pieces/W_Ex.png',
+        black: 'pieces/B_Ex.png'
+    },
+
+    {
+        type: 'M',
+        name: 'Mortar',
+        white: 'pieces/W_M.png',
+        black: 'pieces/B_M.png'
+    },
+
+    {
+        type: 'P',
+        name: 'Pawn',
+        white: 'pieces/W_P.png',
+        black: 'pieces/B_P.png'
+    },
+
+    {
+        type: 'BP',
+        name: 'Berolina Pawn',
+        white: 'pieces/W_BP.png',
+        black: 'pieces/B_BP.png'
+    },
+
+    {
+        type: 'AP',
+        name: 'Arrow Pawn',
+        white: 'pieces/W_AP.png',
+        black: 'pieces/B_AP.png'
+    },
+
+    {
+        type: '0P',
+        name: 'Pawn (Original)',
+        white: 'pieces/W_0P.png',
+        black: 'pieces/B_0P.png'
+    },
+
+    {
+        type: '0Q',
+        name: 'Queen (Original)',
+        white: 'pieces/W_0Q.png',
+        black: 'pieces/B_0Q.png'
+    },
+
+    {
+        type: '0R',
+        name: 'Rook (Original)',
+        white: 'pieces/W_0R.png',
+        black: 'pieces/B_0R.png'
+    },
+
+    {
+        type: '0N',
+        name: 'Knight (Original)',
+        white: 'pieces/W_0N.png',
+        black: 'pieces/B_0N.png'
+    },
+
+    {
+        type: '0B',
+        name: 'Bishop (Original)',
+        white: 'pieces/W_0B.png',
+        black: 'pieces/B_0B.png'
+    }
+
+];
+
+
+/* =========================================================
+   CREATE EMPTY BOARD
+========================================================= */
+
+function createEmptyBoard() {
+
+    setupBoard = [];
+
+    for (let row = 0; row < boardSize; row++) {
+
+        setupBoard[row] = [];
+
+        for (let col = 0; col < boardSize; col++) {
+
+            setupBoard[row][col] = null;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   NORMAL STARTING POSITION
+========================================================= */
+
+const officerRow = [
+    'E', 'Ch', 'Af', 'Ab',
+    'Ex', 'Ca', 'M', 'K',
+    'A', 'J', 'Al', 'R',
+    'ZN', 'Ba', 'Ch', 'E'
+];
+
+const pawnRow = [
+    'BP', 'BP', 'BP', 'P',
+    'P', 'P', 'AP', 'AP',
+    'AP', 'AP', 'P', 'P',
+    'P', 'BP', 'BP', 'BP'
+];
+
+
+function resetBoard() {
+
+    createEmptyBoard();
+
+    for (let col = 0; col < boardSize; col++) {
+
+        setupBoard[0][col] = {
+            type: officerRow[col],
+            color: 'black'
+        };
+
+        setupBoard[15][col] = {
+            type: officerRow[col],
+            color: 'white'
+        };
+
+        setupBoard[1][col] = {
+            type: pawnRow[col],
+            color: 'black'
+        };
+
+        setupBoard[14][col] = {
+            type: pawnRow[col],
+            color: 'white'
+        };
+
+    }
+
+    renderBoard();
+    updateFEN();
+
+}
+
+
+/* =========================================================
+   CREATE VISUAL BOARD
+========================================================= */
+
+function createBoardVisuals() {
+
+    const board = document.getElementById('board');
+
+    const letters = "abcdefghijklmnop";
+
+    for (let row = 0; row < boardSize; row++) {
+
+        for (let col = 0; col < boardSize; col++) {
+
+            const square = document.createElement('div');
+
+            square.className =
+                `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+
+            square.dataset.row = row;
+            square.dataset.col = col;
+
+
+            /* Coordinates */
+
+            if (col === 0) {
+
+                const number = document.createElement('span');
+
+                number.className =
+                    'coord-label coord-number';
+
+                number.innerText =
+                    boardSize - row;
+
+                square.appendChild(number);
+
+            }
+
+
+            if (row === boardSize - 1) {
+
+                const letter = document.createElement('span');
+
+                letter.className =
+                    'coord-label coord-letter';
+
+                letter.innerText =
+                    letters[col];
+
+                square.appendChild(letter);
+
+            }
+
+
+            /* Left click */
+
+            square.addEventListener('click', () => {
+
+                placeSelectedPiece(row, col);
+
+            });
+
+
+            /* Right click */
+
+            square.addEventListener('contextmenu', event => {
+
+                event.preventDefault();
+
+                setupBoard[row][col] = null;
+
+                renderBoard();
+
+                updateFEN();
+
+            });
+
+
+            board.appendChild(square);
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER BOARD
+========================================================= */
+
+function renderBoard() {
+
+    const squares =
+        document.querySelectorAll('.square');
+
+    squares.forEach(square => {
+
+        const row =
+            Number(square.dataset.row);
+
+        const col =
+            Number(square.dataset.col);
+
+        const oldImage =
+            square.querySelector('img');
+
+        if (oldImage) {
+
+            oldImage.remove();
+
+        }
+
+
+        const piece =
+            setupBoard[row][col];
+
+        if (!piece) return;
+
+
+        const colorPrefix =
+            piece.color === 'white'
+                ? 'W'
+                : 'B';
+
+
+        const image =
+            document.createElement('img');
+
+        image.src =
+            `pieces/${colorPrefix}_${piece.type}.png`;
+
+        image.alt =
+            `${piece.color} ${piece.type}`;
+
+        square.appendChild(image);
+
+    });
+
+}
+
+
+/* =========================================================
+   PLACE SELECTED PIECE
+========================================================= */
+
+function placeSelectedPiece(row, col) {
+
+    if (!selectedPiece) return;
+
+    setupBoard[row][col] = {
+
+        type: selectedPiece.type,
+
+        color: selectedPiece.color
+
+    };
+
+    renderBoard();
+
+    updateFEN();
+
+}
+
+
+/* =========================================================
+   PIECE DROPDOWN
+========================================================= */
+
+const selectorHeader =
+    document.getElementById('selector-header');
+
+const dropdown =
+    document.getElementById('piece-dropdown');
+
+const dropdownArrow =
+    document.getElementById('dropdown-arrow');
+
+
+selectorHeader.addEventListener('click', () => {
+
+    dropdown.classList.toggle('open');
+
+    dropdownArrow.classList.toggle('open');
+
+});
+
+
+function createPieceDropdown() {
+
+    dropdown.innerHTML = '';
+
+
+    pieces.forEach(piece => {
+
+        /* White */
+
+        const whiteOption =
+            document.createElement('div');
+
+whiteOption.className =
+    'piece-option';
+
+whiteOption.dataset.pieceName =
+    `White ${piece.name}`;
+
+whiteOption.innerHTML = `
+    <img src="${piece.white}">
+    <span>White ${piece.name}</span>
+`
+
+        whiteOption.addEventListener('click', event => {
+
+            event.stopPropagation();
+
+            selectPiece(piece, 'white');
+
+        });
+
+        dropdown.appendChild(whiteOption);
+
+
+        /* Black */
+
+        const blackOption =
+            document.createElement('div');
+
+blackOption.className =
+    'piece-option';
+
+blackOption.dataset.pieceName =
+    `Black ${piece.name}`;
+
+blackOption.innerHTML = `
+    <img src="${piece.black}">
+    <span>Black ${piece.name}</span>
+`;
+
+        blackOption.addEventListener('click', event => {
+
+            event.stopPropagation();
+
+            selectPiece(piece, 'black');
+
+        });
+
+        dropdown.appendChild(blackOption);
+
+    });
+
+}
+/* =========================================================
+   KEYBOARD PIECE SEARCH
+========================================================= */
+
+let keyboardSearchLetter = '';
+let keyboardSearchIndex = 0;
+let keyboardSearchTimeout = null;
+
+document.addEventListener('keydown', event => {
+    if (!dropdown.classList.contains('open')) return;
+
+    if (
+        event.ctrlKey ||
+        event.altKey ||
+        event.metaKey
+    ) {
+        return;
+    }
+
+    const key = event.key.toLowerCase();
+
+    if (!/^[a-z]$/.test(key)) return;
+
+    event.preventDefault();
+
+    if (keyboardSearchLetter !== key) {
+        keyboardSearchLetter = key;
+        keyboardSearchIndex = 0;
+    } else {
+        keyboardSearchIndex++;
+    }
+
+    clearTimeout(keyboardSearchTimeout);
+
+    keyboardSearchTimeout = setTimeout(() => {
+        keyboardSearchLetter = '';
+        keyboardSearchIndex = 0;
+    }, 1000);
+
+    const matchingPieces = pieces.filter(piece =>
+        piece.name.toLowerCase().startsWith(key)
+    );
+
+    if (matchingPieces.length === 0) return;
+
+    keyboardSearchIndex =
+        keyboardSearchIndex % matchingPieces.length;
+
+    const targetPiece =
+        matchingPieces[keyboardSearchIndex];
+
+    const options =
+        Array.from(
+            dropdown.querySelectorAll('.piece-option')
+        );
+
+    const targetIndex =
+        pieces.indexOf(targetPiece) * 2;
+
+    options.forEach(option => {
+        option.classList.remove('keyboard-highlight');
+    });
+
+    const targetOption = options[targetIndex];
+
+    if (!targetOption) return;
+
+    targetOption.classList.add('keyboard-highlight');
+
+    targetOption.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth'
+    });
+});
+
+/* =========================================================
+   SELECT PIECE
+========================================================= */
+
+function selectPiece(piece, color) {
+
+    selectedPiece = {
+
+        type: piece.type,
+
+        color: color,
+
+        image:
+            color === 'white'
+                ? piece.white
+                : piece.black,
+
+        name:
+            `${color === 'white' ? 'White' : 'Black'} ${piece.name}`
+
+    };
+
+
+    const display =
+        document.getElementById(
+            'selected-piece-display'
+        );
+
+
+    display.innerHTML = `
+
+        <img src="${selectedPiece.image}">
+
+        <span>
+            ${selectedPiece.name}
+        </span>
+
+    `;
+
+
+    dropdown.classList.remove('open');
+
+    dropdownArrow.classList.remove('open');
+
+}
+
+
+/* =========================================================
+   CLEAR BOARD
+========================================================= */
+
+document
+    .getElementById('clear-board')
+    .addEventListener('click', () => {
+
+        createEmptyBoard();
+
+        renderBoard();
+
+        updateFEN();
+
+    });
+
+
+/* =========================================================
+   RESET BUTTON
+========================================================= */
+
+document
+    .getElementById('reset-board')
+    .addEventListener('click', () => {
+
+        resetBoard();
+
+    });
+
+
+/* =========================================================
+   FEN GENERATION
+========================================================= */
+
+function pieceToFEN(piece) {
+
+    if (!piece) return '';
+
+    const map = {
+
+        'K': 'K',
+        'A': 'A',
+        'AfR': 'AfR',
+        'Af': 'Af',
+        'Al': 'Al',
+        'AlR': 'AlR',
+        'Am': 'Am',
+        'J': 'J',
+        'R': 'R',
+        'ZN': 'ZN',
+        'Ch': 'Ch',
+        'Ab': 'Ab',
+        'Ba': 'Ba',
+        'Ca': 'Ca',
+        'E': 'E',
+        'Ex': 'Ex',
+        'M': 'M',
+
+        'P': 'P',
+        'BP': 'BP',
+        'AP': 'AP',
+
+        '0P': '0P',
+        '0Q': '0Q',
+        '0R': '0R',
+        '0N': '0N',
+        '0B': '0B'
+
+    };
+
+
+    let value =
+        map[piece.type] || piece.type;
+
+
+    if (piece.color === 'black') {
+
+        value =
+            value.toLowerCase();
+
+    }
+
+
+    return value;
+
+}
+
+
+/*
+   IMPORTANT:
+
+   This generates the board-position portion
+   of your FEN.
+
+   Each rank is separated by /.
+*/
+
+function generateFEN() {
+
+    let ranks = [];
+
+
+    for (let row = 0; row < boardSize; row++) {
+
+        let rank = '';
+
+        let emptyCount = 0;
+
+
+        for (let col = 0; col < boardSize; col++) {
+
+            const piece =
+                setupBoard[row][col];
+
+
+            if (!piece) {
+
+                emptyCount++;
+
+            } else {
+
+                if (emptyCount > 0) {
+
+                    rank += emptyCount;
+
+                    emptyCount = 0;
+
+                }
+
+                rank += pieceToFEN(piece);
+
+            }
+
+        }
+
+
+        if (emptyCount > 0) {
+
+            rank += emptyCount;
+
+        }
+
+
+        ranks.push(rank);
+
+    }
+
+
+return ranks.join('/') + ' ' + activeSide;
+
+}
+
+
+/* =========================================================
+   UPDATE FEN BOX
+========================================================= */
+
+function updateFEN() {
+
+    document.getElementById('fen-textbox').value =
+        generateFEN();
+
+}
+
+
+/* =========================================================
+   COPY FEN
+========================================================= */
+
+document
+    .getElementById('copy-fen')
+    .addEventListener('click', async () => {
+
+        const fen =
+            document.getElementById('fen-textbox').value;
+
+
+        try {
+
+            await navigator.clipboard.writeText(fen);
+
+            const button =
+                document.getElementById('copy-fen');
+
+            const oldText =
+                button.innerText;
+
+            button.innerText =
+                'COPIED!';
+
+            setTimeout(() => {
+
+                button.innerText =
+                    oldText;
+
+            }, 1000);
+
+        }
+
+        catch (error) {
+
+            alert(
+                'Could not copy automatically. Select the FEN and copy it manually.'
+            );
+
+        }
+
+    });
+
+    /* =========================================================
+   WHITE / BLACK MOVE TOGGLE
+========================================================= */
+
+document
+    .getElementById('move-side-toggle')
+    .addEventListener('click', () => {
+
+        const button =
+            document.getElementById('move-side-toggle');
+
+        if (activeSide === 'w') {
+
+            activeSide = 'b';
+
+            button.innerText = 'BLACK MOVES';
+
+        } else {
+
+            activeSide = 'w';
+
+            button.innerText = 'WHITE MOVES';
+
+        }
+
+        updateFEN();
+
+    });
+
+
+/* =========================================================
+   CLOSE DROPDOWN WHEN CLICKING OUTSIDE
+========================================================= */
+
+document.addEventListener('click', event => {
+
+    if (
+        !event.target.closest(
+            '.selector-container'
+        )
+    ) {
+
+        dropdown.classList.remove('open');
+
+        dropdownArrow.classList.remove('open');
+
+    }
+
+});
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+createEmptyBoard();
+
+createBoardVisuals();
+
+createPieceDropdown();
+
+resetBoard();
+
+</script>
+
+</body>
+</html>

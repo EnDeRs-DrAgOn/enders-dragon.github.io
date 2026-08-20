@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image" href="yes.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16x16 Fairy Chess — PGN & FEN Reference</title>
+
+    <style>
+
+.site-title {
+    color: #ff00ff;
+    text-shadow: 0px 0px 15px rgba(255, 0, 255, 0.8);
+    margin: 10px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-decoration: none;
+    border: none;
+}
+
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #121212;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 10000;
+    border-bottom: 1px solid #2C2C2C;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.5);
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    padding: 80px 25px 25px 25px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.docs-navigation {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+
+    display: flex;
+    gap: 10px;
+
+    z-index: 9999;
+}
+
+.docs-navigation button {
+    width: 50px;
+    height: 50px;
+
+    padding-bottom: 10px;
+
+    background-color: #1A1A1A;
+    border-radius: 12px;
+    box-sizing: border-box;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px solid #2C2C2C;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+
+    cursor: pointer;
+
+    color: #ffffff;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.docs-navigation button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+    background-color: #2A2A2A;
+    border-color: #777777;
+}
+
+.docs-navigation button:active {
+    transform: translateY(2px) scale(0.95);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    background-color: #111111;
+}
+
+h1 {
+    color: #88ff88;
+    border-bottom: 2px solid #333;
+    padding-bottom: 12px;
+    font-size: 24px;
+    margin-top: 0;
+}
+
+h2 {
+    font-size: 18px;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #444;
+    padding-bottom: 4px;
+}
+
+h3 {
+    font-size: 16px;
+    margin-top: 18px;
+    color: #88ff88;
+}
+
+.section {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.example {
+    background-color: #222222;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 12px 0;
+    overflow-x: auto;
+}
+
+.example code {
+    color: #88ff88;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    white-space: pre;
+}
+
+.explanation {
+    color: #cccccc;
+}
+
+.token {
+    color: #ffffff;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.green {
+    color: #88ff88;
+    font-weight: bold;
+}
+
+.yellow {
+    color: #ffaa00;
+    font-weight: bold;
+}
+
+.red {
+    color: #ff5555;
+    font-weight: bold;
+}
+
+.blue {
+    color: #00b0ff;
+    font-weight: bold;
+}
+
+ul {
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th,
+td {
+    border: 1px solid #333333;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #222222;
+    color: #88ff88;
+}
+
+td {
+    background-color: #1a1a1a;
+}
+
+.note {
+    border-left: 3px solid #88ff88;
+    padding-left: 10px;
+    margin: 12px 0;
+    color: #bbbbbb;
+}
+
+    </style>
+</head>
+
+<body>
+
+<div class="top-bar">
+    <img src="yes.png" alt="Logo"
+         style="height: 40px; width: auto; margin-left: 10px;">
+
+    <h2 class="site-title">
+        16x16 Fairy Chess
+    </h2>
+</div>
+
+<div class="docs-navigation">
+    <button onclick="window.location.href='docs.html'" title="Previous">&lt;</button>
+    <button onclick="window.location.href='setup.html'" title="Home">&gt;</button>
+</div>
+
+
+<h1>PGN & FEN Reference Guide</h1>
+
+
+<div class="section">
+
+<h2>1. PGN Move Structure</h2>
+
+<p class="explanation">
+    The notation system records every move using a custom format designed
+    specifically for this 16×16 fairy chess variant.
+</p>
+
+<div class="example">
+<code>12. (AP)l15l16=(Am)+ --XX--</code>
+</div>
+
+<p>
+    A move can be broken down into several parts:
+</p>
+
+<table>
+<tr>
+    <th>Part</th>
+    <th>Meaning</th>
+</tr>
+
+<tr>
+    <td><span class="token">12.</span></td>
+    <td>The sequential move number.</td>
+</tr>
+
+<tr>
+    <td><span class="token">(AP)</span></td>
+    <td>The piece that moved. In this example, it is an Arrow Pawn.</td>
+</tr>
+
+<tr>
+    <td><span class="token">l15</span></td>
+    <td>The square the piece started on.</td>
+</tr>
+
+<tr>
+    <td><span class="token">l16</span></td>
+    <td>The square the piece moved to.</td>
+</tr>
+
+<tr>
+    <td><span class="token">=(Am)</span></td>
+    <td>The piece was promoted to an Amazonian.</td>
+</tr>
+
+<tr>
+    <td><span class="token">+</span></td>
+    <td>The move gives check.</td>
+</tr>
+
+<tr>
+    <td><span class="token">--XX--</span></td>
+    <td>The other side did not make a move for this turn. This is used in sandbox mode.</td>
+</tr>
+
+</table>
+
+</div>
+
+
+<div class="section">
+
+<h2>2. Basic Move</h2>
+
+<div class="example">
+<code>1. (P)k2k5 --XX--</code>
+</div>
+
+<p>
+    This means:
+</p>
+
+<ul>
+    <li><span class="token">(P)</span> — A standard Pawn moved.</li>
+    <li><span class="token">k2</span> — It started on k2.</li>
+    <li><span class="token">k5</span> — It landed on k5.</li>
+    <li><span class="token">--XX--</span> — No opposing move was recorded on this turn.</li>
+</ul>
+
+</div>
+
+
+<div class="section">
+
+<h2>3. Captures</h2>
+
+<div class="example">
+<code>21. (A)i1xh2(A)h2 --XX--</code>
+</div>
+
+<p>
+    The <span class="token">x</span> indicates a capture.
+</p>
+
+<p>
+    The structure is:
+</p>
+
+<div class="example">
+<code>(Piece)StartingSquare x LandingSquare (CapturedPiece)CapturedSquare</code>
+</div>
+
+<p>
+    For a normal capture, the landing square and captured-piece square
+    are the same.
+</p>
+
+<div class="example">
+<code>(A)i1xh2(A)h2</code>
+</div>
+
+<p class="note">
+    Special pieces such as Arrow Pawns, Mortars, and Executioners can
+    have different capture and landing locations. Those cases preserve
+    both coordinates when necessary.
+</p>
+
+</div>
+
+
+<div class="section">
+
+<h2>4. Promotions</h2>
+
+<div class="example">
+<code>14. (AP)l15l16=(Am)+ --XX--</code>
+</div>
+
+<p>
+    Promotions are written directly after the move coordinates.
+</p>
+
+<div class="example">
+<code>=(Piece)</code>
+</div>
+
+<p>
+    For example:
+</p>
+
+<ul>
+    <li><span class="token">=(A)</span> — promoted to Amazon</li>
+    <li><span class="token">=(R)</span> — promoted to Rose</li>
+    <li><span class="token">=(Ch)</span> — promoted to Chancellor</li>
+    <li><span class="token">=(Ab)</span> — promoted to Archbishop</li>
+    <li><span class="token">=(Ba)</span> — promoted to Baronet</li>
+    <li><span class="token">=(Ca)</span> — promoted to Castle</li>
+    <li><span class="token">=(E)</span> — promoted to Elephant</li>
+    <li><span class="token">=(Ex)</span> — promoted to Executioner</li>
+    <li><span class="token">=(ZN)</span> — promoted to Zigzag Nightrider</li>
+</ul>
+
+</div>
+
+
+<div class="section">
+
+<h2>5. Check, Checkmate & Stalemate</h2>
+
+<p>
+    Special game-state symbols are placed immediately after the move
+    (and after a promotion if one occurred).
+</p>
+
+<div class="example">
+<code>20. (A)h14xh2(AP)h2+ --XX--</code>
+</div>
+
+<p>
+    The symbols are:
+</p>
+
+<table>
+
+<tr>
+    <th>Symbol</th>
+    <th>Meaning</th>
+</tr>
+
+<tr>
+    <td><span class="green">+</span></td>
+    <td>Check — the opponent's King is currently threatened.</td>
+</tr>
+
+<tr>
+    <td><span class="red">#</span></td>
+    <td>Checkmate — the opponent is in check and has no legal move.</td>
+</tr>
+
+<tr>
+    <td><span class="yellow">%</span></td>
+    <td>Stalemate — the opponent has no legal move, but is not in check.</td>
+</tr>
+
+</table>
+
+<div class="example">
+<code>22. (A)h2n8# --XX--</code>
+</div>
+
+</div>
+
+
+<div class="section">
+
+<h2>6. Sandbox vs Turn-Based Notation</h2>
+
+<h3>Sandbox Mode</h3>
+
+<p>
+    Every individual move receives its own sequential number.
+    The unused side of the turn is represented by <span class="token">--XX--</span>.
+</p>
+
+<div class="example">
+<code>
+1. (P)k2k5 --XX--
+2. (P)k5k7 --XX--
+3. (P)k7k8 --XX--
+4. (P)k8k9 --XX--
+</code>
+</div>
+
+<h3>Turn-Based Mode</h3>
+
+<p>
+    White and Black share the same move number.
+</p>
+
+<div class="example">
+<code>
+1. (P)k2k5   (P)k15k12
+2. (P)k5k7   (P)k12k11
+3. (P)k7k8   (P)k11k10
+</code>
+</div>
+
+</div>
+
+
+<div class="section">
+
+<h2>7. FEN Structure</h2>
+
+<p>
+    The FEN system describes the entire current board position in a
+    compact text format.
+</p>
+
+<p>
+    Your variant uses a modified FEN format consisting of:
+</p>
+
+<div class="example">
+<code>BOARD_POSITION ACTIVE_SIDE</code>
+</div>
+
+<p>
+    For example:
+</p>
+
+<div class="example">
+<code>.../16/... w</code>
+</div>
+
+<p>
+    The first part describes all 16 ranks of the board.
+    The second part tells the game which side is currently active.
+</p>
+
+</div>
+
+
+<div class="section">
+
+<h2>8. FEN Board Rows</h2>
+
+<p>
+    Each rank is separated using a forward slash:
+</p>
+
+<div class="example">
+<code>rank16/rank15/rank14/.../rank1</code>
+</div>
+
+<p>
+    The board always contains <span class="green">16 rows</span>,
+    corresponding to ranks 16 through 1.
+</p>
+
+<p>
+    Empty squares are represented using numbers.
+</p>
+
+<div class="example">
+<code>16</code>
+</div>
+
+<p>
+    This means that all 16 squares in that row are empty.
+</p>
+
+<p>
+    For example:
+</p>
+
+<div class="example">
+<code>8P7</code>
+</div>
+
+<p>
+    means:
+</p>
+
+<ul>
+    <li>8 empty squares</li>
+    <li>1 white standard Pawn</li>
+    <li>7 empty squares</li>
+</ul>
+
+</div>
+
+
+<div class="section">
+
+<h2>9. FEN Piece Codes</h2>
+
+<p>
+    White pieces use uppercase codes while Black pieces use lowercase
+    codes.
+</p>
+
+<table>
+
+<tr>
+    <th>Piece</th>
+    <th>White</th>
+    <th>Black</th>
+</tr>
+
+<tr><td>Pawn</td><td>P</td><td>p</td></tr>
+<tr><td>Berolina Pawn</td><td>BP</td><td>bp</td></tr>
+<tr><td>Arrow Pawn</td><td>AP</td><td>ap</td></tr>
+<tr><td>King</td><td>K</td><td>k</td></tr>
+<tr><td>Amazon</td><td>A</td><td>a</td></tr>
+<tr><td>Rose</td><td>R</td><td>r</td></tr>
+<tr><td>Chancellor</td><td>Ch</td><td>ch</td></tr>
+<tr><td>Archbishop</td><td>Ab</td><td>ab</td></tr>
+<tr><td>Baronet</td><td>Ba</td><td>ba</td></tr>
+<tr><td>Castle</td><td>Ca</td><td>ca</td></tr>
+<tr><td>Elephant</td><td>E</td><td>e</td></tr>
+<tr><td>Executioner</td><td>Ex</td><td>ex</td></tr>
+<tr><td>Mortar</td><td>M</td><td>m</td></tr>
+<tr><td>Zigzag Nightrider</td><td>ZN</td><td>zn</td></tr>
+<tr><td>Alfil</td><td>Af</td><td>af</td></tr>
+<tr><td>Alfilrider</td><td>AfR</td><td>afr</td></tr>
+<tr><td>Alibaba</td><td>Al</td><td>al</td></tr>
+<tr><td>Alibabarider</td><td>AlR</td><td>alr</td></tr>
+<tr><td>Amazonian</td><td>Am</td><td>am</td></tr>
+<tr><td>Jester</td><td>J</td><td>j</td></tr>
+<tr><td>Original Queen</td><td>0Q</td><td>0q</td></tr>
+<tr><td>Original Rook</td><td>0R</td><td>0r</td></tr>
+<tr><td>Original Bishop</td><td>0B</td><td>0b</td></tr>
+<tr><td>Original Knight</td><td>0N</td><td>0n</td></tr>
+<tr><td>Original Pawn</td><td>0P</td><td>0p</td></tr>
+
+</table>
+
+</div>
+
+
+<div class="section">
+
+<h2>10. Multi-Character FEN Codes</h2>
+
+<p>
+    Because several fairy pieces have names longer than one character,
+    they are enclosed in parentheses.
+</p>
+
+<div class="example">
+<code>(BP) (AP) (Ch) (ZN) (AfR) (AlR)</code>
+</div>
+
+<p>
+    This prevents the FEN parser from confusing a multi-character piece
+    with several separate pieces.
+</p>
+
+<p>
+    For example:
+</p>
+
+<div class="example">
+<code>4(AP)5</code>
+</div>
+
+<p>
+    means four empty squares, one Arrow Pawn, then five empty squares.
+</p>
+
+</div>
+
+
+<div class="section">
+
+<h2>11. Active Side</h2>
+
+<p>
+    The final character tells the engine whose turn it currently is.
+</p>
+
+<div class="example">
+<code>w</code>
+</div>
+
+<p>
+    means White to move.
+</p>
+
+<div class="example">
+<code>b</code>
+</div>
+
+<p>
+    means Black to move.
+</p>
+
+<p class="note">
+    The active-side value is especially important when loading a FEN
+    position into Turn-Based Mode.
+</p>
+
+</div>
+
+
+<div class="section">
+
+<h2>12. Complete FEN Concept</h2>
+
+<p>
+    A complete FEN therefore follows this general structure:
+</p>
+
+<div class="example">
+<code>
+Rank 16 / Rank 15 / Rank 14 / ... / Rank 1 + active side
+</code>
+</div>
+
+<p>
+    In actual input, the spaces around the slashes are omitted:
+</p>
+
+<div class="example">
+<code>
+BOARD/ROWS/ARE/WRITTEN/HERE/UNTIL/16/ROWS/ARE/DEFINED w
+</code>
+</div>
+
+<p class="note">
+    Numbers represent consecutive empty squares, piece codes represent
+    occupied squares, and the final <span class="token">w</span> or
+    <span class="token">b</span> determines the active side.
+</p>
+
+</div>
+
+</body>
+</html>

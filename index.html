@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY 16x16 Fairy Chess</title>
+    <link rel="icon" type="image" href="yes.png">
+    <link rel="stylesheet" href="buttons.css">
+
+    <script src="audioSystem.js"></script>    
+    <script src="movementUtils.js"></script>
+
+<!-- Individual piece movement modules -->
+<script src="piecemovements/pawns.js"></script>
+<script src="piecemovements/king.js"></script>
+<script src="piecemovements/bishop.js"></script>
+<script src="piecemovements/elephant.js"></script>
+<script src="piecemovements/amazon.js"></script>
+<script src="piecemovements/chancellor.js"></script>
+<script src="piecemovements/archbishop.js"></script>
+<script src="piecemovements/baronet.js"></script>
+<script src="piecemovements/castle.js"></script>
+<script src="piecemovements/executioner.js"></script>
+<script src="piecemovements/alfil.js"></script>
+<script src="piecemovements/alibaba.js"></script>
+<script src="piecemovements/amazonian.js"></script>
+<script src="piecemovements/jester.js"></script>
+<script src="piecemovements/zigzagNightrider.js"></script>
+<script src="piecemovements/alfilrider.js"></script>
+<script src="piecemovements/alibabarider.js"></script>
+<script src="piecemovements/rose.js"></script>
+<script src="piecemovements/mortar.js"></script>
+<script src="piecemovements/legacyPieces.js"></script>
+
+<!-- Dispatcher must load after all movement modules -->
+<script src="movements.js"></script>
+
+    <script src="gameMode.js"></script>
+    <script src="fenSystem.js"></script>
+    <script src="notationSystem.js"></script> 
+
+    <style>
+
+.square img.piece-icon {
+    width: 95%;            /* Scales nicely inside the 45px square */
+    height: 95%;
+    object-fit: contain;   /* Preserves image aspect ratio */
+    pointer-events: none;  /* Lets click events pass straight through to the tile */
+    user-select: none;
+}
+        
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #121212; /* Matches your button colors */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 10000; /* Stays above everything else */
+    border-bottom: 1px solid #2C2C2C;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Adjust the Body so the board doesn't hide behind the bar */
+body {
+    padding-top: 80px; /* Adjust this based on bar height */
+}
+        
+        /* Base Chess Engine Layout Definitions */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+            margin-top: 10px;
+        }
+        
+        #board {
+            display: grid;
+            grid-template-columns: repeat(16, 45px);
+            grid-template-rows: repeat(16, 45px);
+            position: relative;
+            outline: none;
+            border-radius: 0px; 
+            border: 0px solid #2C2C2C;            
+            box-shadow: 0px 0px 20000px rgba(255,0,255,0.2);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* --- FEN CONTROLLER INTERFACE CONSOLE --- */
+        .fen-container {
+            width: 728px; /* 16 columns * 45px + 8px grid outer frame width = 728px flush match */
+            margin: 20px auto 0 auto; 
+            box-sizing: border-box;
+        }
+
+        #fen-textbox {
+            width: 100%;
+            padding: 14px 18px;
+            background-color: #1A1A1A; 
+            color: #ffffff;
+            font-family: 'Consolas', 'Courier New', monospace; 
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            text-align: center;
+            
+            /* Completely flat edges, no rounded corners */
+            border-radius: 0px; 
+            border: 1px solid #2C2C2C;
+            
+            /* White glow: Identical copy of your #board glowing ambient lighting shadow */
+            box-shadow: 0px 0px 20px rgba(255,0,255,0.2);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #fen-textbox:focus {
+            border-color: #444444;
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.35);
+        }
+
+        /* --- FAIRY NOTATION LOGGER SYSTEM CONSOLE --- */
+        .notation-container {
+            width: 728px; /* Matches the chessboard width profile */
+            margin: 15px auto 25px auto; 
+            box-sizing: border-box;
+        }
+
+        #notation-textbox {
+            width: 100%;
+            height: 110px; 
+            padding: 14px 18px;
+            background-color: #1A1A1A; 
+            color: #88ff88; /* Matrix Cyber Green */
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            box-sizing: border-box;
+            outline: none;
+            resize: none; 
+            
+            /* SCROLL SELECTION HANDLING: Keeps window dimensions fixed, lets text scroll */
+            overflow-y: auto;
+            white-space: pre;
+            
+            /* FLAT OUTLINE: Sharp layout matching frames */
+            border-radius: 0px; 
+            border: 1px solid #2C2C2C;
+            box-shadow: 0px 0px 20px rgba(255,0,255,0.2);
+            
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Custom text select highlights for manual drag selection scrolling */
+        #notation-textbox::selection {
+            background: #2A442A;
+            color: #ffffff;
+        }
+
+        #notation-textbox:focus {
+            border-color: #444444;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+        }
+
+
+        .square {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            font-weight: 900;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        .light { background-color: #eeeeee; }
+        .dark { background-color: #555555; }
+        .selected { background-color: #7b61ff !important; }
+        
+        .legal-move::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .capture-move::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 3px solid rgba(255, 0, 0, 0.85);
+            z-index: 30; 
+        }
+
+        .piece {
+            pointer-events: none;
+            z-index: 20;
+        }
+        .white-piece {
+            color: white;
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+        }
+        .black-piece {
+            color: black;
+            text-shadow: 2px 2px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+    <img src="yes.png" alt="Logo" style="height: 40px; width: auto; margin-left: 10px;">
+    <h2 style="color: #ff00ff; text-shadow: 0px 0px 15px rgba(255, 0, 255, 0.8); margin: 10px;">
+        16x16 Fairy Chess
+    </h2>
+</div>
+    
+<a href="https://github.com/EnDeRs-DrAgOn/enders-dragon.github.io"
+   class="github-button"
+   title="Open GitHub repository"
+   target="_blank"
+   rel="noopener noreferrer">
+    <img src="github.svg" alt="GitHub">
+</a>
+
+<button onclick="window.location.href='docs.html'" class="docs-button" title="Open Rules Guide">
+    <img src="docs.png" alt="Rules Icon">
+</button>
+
+    <div class="lever-track-container" onclick="toggleGameModeRules();">
+        <div id="lever-knob" class="lever-slider-box">O</div>
+    </div>
+
+<div style="color: #88ff88; margin-bottom: 10px; font-size: 14px; font-weight: bold; text-align: center; max-width: 950px; line-height: 1.8; display: flex; flex-direction: column; align-items: center;">
+        <div>Promotion Keys:</div>
+        <div>
+            1= Amazon | 2= Rose | 3= Chancellor | 4= Archbishop | 5= Baronet | 6= Castle | 7= Elephant | 8= Executioner | 9= Jester
+        </div>
+        <div>
+            0= Zigzag Night Rider | q= Alfil Rider | w= Alfil | e= Alibaba | r= Alibaba Rider | t= Amazonian
+        </div>
+
+    </div>
+    
+    <div id="board"></div>
+
+    <div class="fen-container">
+        <input type="text" id="fen-textbox" value="" placeholder="Press Enter to execute FEN array positions..." autocomplete="off">
+    </div>
+
+    <div class="notation-container">
+        <textarea id="notation-textbox" readonly placeholder="Game Notation Log initialized... Make a move to record historical metrics."></textarea>
+    </div>
+
+<script>
+
+    
+    const boardSize = 16;
+    let board = new Array(boardSize).fill(null).map(() => new Array(boardSize).fill(null));
+    let positionStatus = "normal";
+    let selectedSquare = null;
+    let legalMoves = [];
+    let enPassantTarget = null;
+    let promotionSquare = null;
+
+    let amazonianUnlocked = { white: false, black: false };
+    let lastMovedPieceType = null; 
+
+    const officerRow = [
+        'E', 'Ch', 'Af', 'Ab', 'Ex', 'Ca', 'M', 'K', 
+        'A', 'J', 'Al', 'R', 'ZN', 'Ba', 'Ch', 'E'
+    ];
+
+    const pawnRow = [
+        'BP', 'BP', 'BP', 'P', 'P', 'P', 'AP', 'AP', 
+        'AP', 'AP', 'P', 'P', 'P', 'BP', 'BP', 'BP'
+    ];
+
+    const promotionMap = {
+        '1': 'A', '2': 'R', '3': 'Ch', '4': 'Ab', '5': 'Ba',
+        '6': 'Ca', '7': 'E','8': 'Ex', '9': 'ZN', 
+        'q': 'AfR', 'w': 'Af', 'e': 'Al', 'r': 'AlR', 't': 'Am', '0': 'J',
+        'z': '0Q', 'x': '0R', 'c': '0N', 'v': '0P', 'b': '0B'
+    };
+
+    const longPieceNames = {
+        'A': 'Amazon', 'R': 'Rose', 'Ch': 'Chancellor', 'Ab': 'Archbishop', 'Ba': 'Baronet',
+        'Ca': 'Castle', 'E': 'Elephant', '0B': 'Bishop (Original)', 'Ex': 'Executioner', 'ZN': 'Zigzag Nightrider',
+        'AfR': 'Alfilrider', 'Af': 'Alfil', 'Al': 'Alibaba', 'AlR': 'Alibabarider', 'Am': 'Amazonian', 'J': 'Jester',
+        'M': 'Mortar', '0Q': 'Queen (Original)', '0R': 'Rook (Original)', '0N': 'Knight (Original)', '0P': 'Pawn (Original)'
+    };
+
+    function setupBoard() {
+        for (let col = 0; col < boardSize; col++) {
+            board[0][col] = { type: officerRow[col], color: 'black', moves: 0 };
+            board[15][col] = { type: officerRow[col], color: 'white', moves: 0 };
+
+            board[1][col] = { type: pawnRow[col], color: 'black', moves: 0 };
+            board[14][col] = { type: pawnRow[col], color: 'white', moves: 0 };
+        }
+    }
+
+    function findKing(color) {
+        for (let r = 0; r < boardSize; r++) {
+            for (let c = 0; c < boardSize; c++) {
+                if (board[r][c] && board[r][c].type === 'K' && board[r][c].color === color) {
+                    return { row: r, col: c };
+                }
+            }
+        }
+        return null;
+    }
+
+    function isSquareAttacked(targetRow, targetCol, attackerColor) {
+        for (let r = 0; r < boardSize; r++) {
+            for (let c = 0; c < boardSize; c++) {
+                if (board[r][c] && board[r][c].color === attackerColor) {
+                    if (typeof getPseudoLegalMoves !== 'function') return false;
+                    const attackMoves = getPseudoLegalMoves(r, c);
+for (let move of attackMoves) {
+
+    // Normal movement attacks
+    if (move.row === targetRow && move.col === targetCol) {
+        return true;
+    }
+
+    // Arrow Pawn ranged attacks
+    if (
+        move.isArrowShoot &&
+        move.targetRow === targetRow &&
+        move.targetCol === targetCol
+    ) {
+        return true;
+    }
+
+    // Mortar shell attacks
+    if (
+        move.isMortarShot &&
+        move.targetRow === targetRow &&
+        move.targetCol === targetCol
+    ) {
+        return true;
+    }
+}
+                }
+            }
+        }
+        return false;
+    }
+
+    function isKingInCheck(color) {
+        const kingPos = findKing(color);
+        if (!kingPos) return false;
+        const enemyColor = color === 'white' ? 'black' : 'white';
+        return isSquareAttacked(kingPos.row, kingPos.col, enemyColor);
+    }
+
+    function getStrictlyLegalMoves(r, c) {
+        const piece = board[r][c];
+        if (!piece || typeof getPseudoLegalMoves !== 'function') return [];
+
+        const pseudoMoves = getPseudoLegalMoves(r, c);
+        let validMoves = [];
+
+        for (let move of pseudoMoves) {
+            const originalSource = board[r][c];
+            const originalTarget = board[move.row][move.col];
+            let originalArrowTarget = null;
+
+            if (move.isArrowShoot) {
+                originalArrowTarget = board[move.targetRow][move.targetCol];
+                board[move.targetRow][move.targetCol] = null;
+            }
+            board[move.row][move.col] = originalSource;
+            board[r][c] = null;
+
+            if (!isKingInCheck(piece.color)) {
+                validMoves.push(move);
+            }
+
+            board[r][c] = originalSource;
+            board[move.row][move.col] = originalTarget;
+            if (move.isArrowShoot) {
+                board[move.targetRow][move.targetCol] = originalArrowTarget;
+            }
+        }
+        return validMoves;
+    }
+
+    function scanGameEndConditions(playerColor) {
+        let totalLegalMoves = 0;
+
+        for (let r = 0; r < boardSize; r++) {
+            for (let c = 0; c < boardSize; c++) {
+                if (board[r][c] && board[r][c].color === playerColor) {
+                    totalLegalMoves += getStrictlyLegalMoves(r, c).length;
+                }
+            }
+        }   
+
+    const inCheck = isKingInCheck(playerColor);
+
+if (totalLegalMoves === 0) {
+    if (inCheck) {
+        positionStatus = "inmate";
+
+        playCheckmateSound();
+
+        setTimeout(() => alert(`🚨 CHECKMATE! Game Over.`), 150);
+    } else {
+        positionStatus = "instale";
+
+        playStalemateSound();
+
+        setTimeout(() => alert(`⚖️ STALEMATE!`), 150);
+    }
+} else if (inCheck) {
+    positionStatus = "incheck";
+
+    playCheckSound();
+
+} else {
+    positionStatus = "normal";
+}
+}
+
+function appendStatusToLastMove() {
+    if (moveHistoryLog.length === 0) return;
+
+    const lastIndex = moveHistoryLog.length - 1;
+    let activeLine = moveHistoryLog[lastIndex];
+
+    let suffix = "";
+
+    if (positionStatus === "incheck") {
+        suffix = "+";
+    } else if (positionStatus === "inmate") {
+        suffix = "#";
+    } else if (positionStatus === "instale") {
+        suffix = "%";
+    }
+
+    if (suffix) {
+        const placeholderIndex = activeLine.indexOf(" --XX--");
+
+        if (placeholderIndex !== -1) {
+            activeLine =
+                activeLine.slice(0, placeholderIndex) +
+                suffix +
+                activeLine.slice(placeholderIndex);
+        } else {
+            activeLine += suffix;
+        }
+
+        moveHistoryLog[lastIndex] = activeLine;
+    }
+
+    updateNotationConsoleUI();
+}
+// =========================================================
+// PERSISTENT BOARD RENDERER
+// =========================================================
+//
+// The old drawBoard() destroyed and recreated all 256 squares
+// every time anything happened. This caused visible flashing
+// and unnecessary reloading of piece images.
+//
+// This version creates the board squares only once and then
+// updates their contents/classes in place.
+//
+
+const boardSquares = [];
+
+function initializeBoardVisuals() {
+    const boardDiv = document.getElementById('board');
+    if (!boardDiv || boardSquares.length > 0) return;
+
+    const letters = "abcdefghijklmnop";
+
+    for (let row = 0; row < boardSize; row++) {
+        boardSquares[row] = [];
+
+        for (let col = 0; col < boardSize; col++) {
+            const square = document.createElement('div');
+
+            square.className =
+                `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+
+            square.dataset.row = row;
+            square.dataset.col = col;
+
+            if (col === 0) {
+                const numLabel = document.createElement('span');
+                numLabel.className = 'coord-label coord-number';
+                numLabel.innerText = boardSize - row;
+                square.appendChild(numLabel);
+            }
+
+            if (row === boardSize - 1) {
+                const letLabel = document.createElement('span');
+                letLabel.className = 'coord-label coord-letter';
+                letLabel.innerText = letters[col];
+                square.appendChild(letLabel);
+            }
+
+            square.addEventListener('click', () => {
+                handleSquareClick(row, col);
+            });
+
+            boardDiv.appendChild(square);
+            boardSquares[row][col] = square;
+        }
+    }
+}
+
+function drawBoard() {
+    const boardDiv = document.getElementById('board');
+    if (!boardDiv) return;
+
+    initializeBoardVisuals();
+
+    const statusSpan = document.getElementById('mimic-status');
+
+    if (statusSpan) {
+        statusSpan.innerText =
+            lastMovedPieceType
+                ? `${longPieceNames[lastMovedPieceType] || lastMovedPieceType} (${lastMovedPieceType})`
+                : "None (King Fallback)";
+    }
+
+    const whiteInCheck = isKingInCheck('white');
+    const blackInCheck = isKingInCheck('black');
+
+    for (let row = 0; row < boardSize; row++) {
+        for (let col = 0; col < boardSize; col++) {
+
+            const square = boardSquares[row][col];
+
+            square.classList.remove(
+                'selected',
+                'legal-move',
+                'capture-move'
+            );
+
+            square.style.backgroundColor = '';
+
+            if (
+                selectedSquare &&
+                selectedSquare.row === row &&
+                selectedSquare.col === col
+            ) {
+                square.classList.add('selected');
+            }
+
+            const legalMove = legalMoves.find(m => {
+
+                if (m.isMortarShot) {
+                    return (
+                        m.targetRow === row &&
+                        m.targetCol === col
+                    );
+                }
+
+                return (
+                    m.row === row &&
+                    m.col === col
+                );
+            });
+
+            if (legalMove) {
+                if (legalMove.isCapture) {
+                    square.classList.add('capture-move');
+                } else {
+                    square.classList.add('legal-move');
+                }
+            }
+
+            const piece = board[row][col];
+
+            let pieceElement = square.querySelector(
+                '.piece-icon, .piece'
+            );
+
+            if (!piece) {
+
+                if (pieceElement) {
+                    pieceElement.remove();
+                }
+
+                square.dataset.pieceKey = '';
+
+            } else {
+
+                const colorPrefix =
+                    piece.color === 'white' ? 'W' : 'B';
+
+                const pieceKey =
+                    `${colorPrefix}_${piece.type}`;
+
+                if (square.dataset.pieceKey !== pieceKey) {
+
+                    if (pieceElement) {
+                        pieceElement.remove();
+                    }
+
+                    const pieceImg =
+                        document.createElement('img');
+
+                    pieceImg.src =
+                        `pieces/${colorPrefix}_${piece.type}.png`;
+
+                    pieceImg.className =
+                        'piece-icon';
+
+                    pieceImg.alt =
+                        `${piece.color} ${piece.type}`;
+
+                    pieceImg.draggable = false;
+
+                    pieceImg.onerror = function () {
+
+                        if (
+                            this.dataset.fallbackApplied === 'true'
+                        ) {
+                            return;
+                        }
+
+                        this.dataset.fallbackApplied = 'true';
+
+                        const fallbackSpan =
+                            document.createElement('span');
+
+                        fallbackSpan.className =
+                            `piece ${piece.color}-piece`;
+
+                        fallbackSpan.innerText =
+                            piece.type;
+
+                        this.replaceWith(fallbackSpan);
+                    };
+
+                    square.appendChild(pieceImg);
+
+                    square.dataset.pieceKey = pieceKey;
+                }
+            }
+
+            if (piece && piece.type === 'K') {
+
+                if (
+                    (piece.color === 'white' && whiteInCheck) ||
+                    (piece.color === 'black' && blackInCheck)
+                ) {
+                    square.style.backgroundColor = '#8b0000';
+                }
+            }
+        }
+    }
+}    
+function checkAlfilPromotion(row, col) {
+    const piece = board[row][col];
+    if (!piece || piece.type !== 'Af') return;
+
+    if (
+        (piece.color === 'white' && row <= 7) ||
+        (piece.color === 'black' && row >= 8)
+    ) {
+        piece.type = 'AfR';
+
+        setTimeout(() => {
+            alert(`${piece.color.toUpperCase()} Alfil upgraded to Alfilrider!`);
+        }, 50);
+    }
+}
+    function checkAlibabaPromotion(row, col, capturedPiece) {
+        const piece = board[row][col];
+        if (!piece || piece.type !== 'Al') return;
+        if (capturedPiece && (capturedPiece.type === 'P' || capturedPiece.type === '0P' || capturedPiece.type === 'BP' || capturedPiece.type === 'AP')) {
+            piece.type = 'AlR';
+            setTimeout(() => alert(`💥 SUCCESS! Alibaba evolved into Alibabarider!`), 50);
+        }
+    }
+
+    function checkExecutioner(r, c) {
+        const piece = board[r][c];
+        if (!piece || piece.type !== 'Ex') return;
+        const adjs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+        let executed = false;
+        let victimColor = '';
+
+        adjs.forEach(d => {
+            let nr = r + d[0], nc = c + d[1];
+            if (onBoard(nr, nc)) {
+                let target = board[nr][nc];
+                if (target && target.type === 'A' && target.color !== piece.color) {
+                    victimColor = target.color;
+                    board[nr][nc] = null; executed = true;
+                }
+            }
+        });
+        if (executed) {
+            board[r][c] = null; 
+            amazonianUnlocked[victimColor] = true; 
+            setTimeout(() => alert(`🚨 AMAZONIAN UNLOCKED for ${victimColor.toUpperCase()}!`), 50);
+        }
+    }
+
+    function handleSquareClick(row, col) {
+        if (promotionSquare) return;
+        
+        if (selectedSquare) {
+const isLegal = legalMoves.find(m => {
+    if (m.isMortarShot) {
+        return m.targetRow === row && m.targetCol === col;
+    }
+
+    return m.row === row && m.col === col;
+});
+            if (isLegal) {
+                const { row: sr, col: sc } = selectedSquare;
+                const piece = board[sr][sc];
+
+// =========================================================
+// MORTAR SHELL
+// =========================================================
+//
+// A Mortar shell captures the target without moving
+// the Mortar itself.
+
+if (isLegal.isMortarShot) {
+
+    const targetRow = isLegal.targetRow;
+    const targetCol = isLegal.targetCol;
+
+    const capturedPiece = board[targetRow][targetCol];
+
+    // Record the shell attack.
+    if (typeof recordNotationMove === 'function') {
+        recordNotationMove(
+            sr,
+            sc,
+            sr,
+            sc,
+            piece,
+            capturedPiece,
+            false,
+            piece.type,
+            targetRow,
+            targetCol
+        );
+    }
+
+    // Destroy the target.
+    board[targetRow][targetCol] = null;
+
+    // IMPORTANT:
+    // Do NOT move the Mortar.
+    //
+    // We intentionally do NOT do:
+    //
+    // board[row][col] = piece;
+    // board[sr][sc] = null;
+
+    enPassantTarget = null;
+
+    piece.moves += 1;
+
+    selectedSquare = null;
+    legalMoves = [];
+
+if (typeof advanceTurnState === 'function') {
+    advanceTurnState();
+
+    // Don't update FEN while waiting for promotion.
+    if (!promotionSquare) {
+        updateFenConsole();
+    }
+}
+
+    const opponentColor =
+        piece.color === 'white' ? 'black' : 'white';
+
+scanGameEndConditions(opponentColor);
+appendStatusToLastMove();
+
+// =========================================================
+// MORTAR SHELL SOUND
+// =========================================================
+// Game-status sounds take priority over capture sound.
+
+if (positionStatus === "inmate") {
+    // Checkmate sound already played.
+}
+else if (positionStatus === "incheck") {
+    // Check sound already played.
+}
+else if (positionStatus === "instale") {
+    // Stalemate sound already played.
+}
+else {
+    playCaptureSound();
+}
+
+drawBoard();
+
+return;
+}
+                const isWhite = piece.color === 'white';
+                const dir = isWhite ? -1 : 1;
+                let capturedPiece = board[row][col];
+
+
+
+// --- BEGIN MOVEMENT LOGGING SEPARATOR ---
+                const movingPieceIdentity = piece.type;
+                let executionerVictimCoord = null;
+                let executionerVictimPiece = null;
+
+                // SPECIAL LOGIC: Scan for Executioner passive splash-damage targets before the board updates
+                if (piece.type === 'Ex') {
+                    const adjs = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+                    for (let d of adjs) {
+                        let nr = row + d[0], nc = col + d[1];
+                        if (onBoard(nr, nc)) {
+                            let target = board[nr][nc];
+                            if (target && target.type === 'A' && target.color !== piece.color) {
+                                executionerVictimCoord = { r: nr, c: nc };
+                                executionerVictimPiece = target;
+                                break; // Log the first executed Amazon found
+                            }
+                        }
+                    }
+                }
+
+                if (isLegal.isArrowShoot) {
+                    capturedPiece = board[isLegal.targetRow][isLegal.targetCol];
+                    if (typeof recordNotationMove === 'function') {
+                        recordNotationMove(sr, sc, row, col, piece, capturedPiece, true, movingPieceIdentity, isLegal.targetRow, isLegal.targetCol);
+                    }
+                    board[isLegal.targetRow][isLegal.targetCol] = null; 
+                } else if (executionerVictimCoord) {
+
+                    capturedPiece = executionerVictimPiece;
+
+                    // Trigger custom log mapping for Executioner massive wipeouts
+                    if (typeof recordNotationMove === 'function') {
+                        recordNotationMove(sr, sc, row, col, piece, executionerVictimPiece, false, movingPieceIdentity, executionerVictimCoord.r, executionerVictimCoord.c, true);
+                    }
+                } else {
+                    if (isLegal.isEnPassant && enPassantTarget) {
+                        capturedPiece = board[enPassantTarget.captureRow][enPassantTarget.captureCol];
+                    }
+                    if (typeof recordNotationMove === 'function') {
+                        recordNotationMove(sr, sc, row, col, piece, capturedPiece, false, movingPieceIdentity);
+                    }
+                }
+                // --- END MOVEMENT LOGGING SEPARATOR ---
+
+
+
+                if (piece.type === 'Ex' && capturedPiece && capturedPiece.type === 'A' && capturedPiece.color !== piece.color) {
+                    const victimColor = capturedPiece.color;
+                    amazonianUnlocked[victimColor] = true;
+                }
+
+                if (isLegal.isEnPassant && enPassantTarget) {
+                    board[enPassantTarget.captureRow][enPassantTarget.captureCol] = null;
+                }
+
+                if (piece.type !== 'J') {
+                    lastMovedPieceType = piece.type;
+                }
+
+                board[row][col] = piece;
+                board[sr][sc] = null;
+                enPassantTarget = null; 
+                
+                if (piece.type === 'P' || piece.type === '0P' || piece.type === 'BP' || piece.type === 'AP') {
+                    const squaresMoved = Math.abs(row - sr);
+
+                    if (piece.type === 'P' && piece.moves === 0 && squaresMoved === 3) {
+                        enPassantTarget = { row: row - dir, col: col, captureRow: row, captureCol: col, type: 'P' };
+                    } 
+                    else if (piece.type === '0P' && piece.moves === 0 && squaresMoved === 2) {
+                        enPassantTarget = { row: row - dir, col: col, captureRow: row, captureCol: col, type: '0P' };
+                    }
+                    else if (piece.type === 'AP' && piece.moves === 0 && squaresMoved === 3) {
+                        enPassantTarget = { row: row - dir, col: col, captureRow: row, captureCol: col, type: 'AP' };
+                    }
+                    else if (piece.type === 'AP' && piece.moves === 0 && squaresMoved === 2) {
+                        enPassantTarget = { row: row - dir, col: col, captureRow: row, captureCol: col, type: 'AP' };
+                    }
+                    else if (piece.type === 'BP' && isLegal.stepCount && isLegal.stepCount > 1) {
+                        const shadowR = sr + (dir * (isLegal.stepCount - 1));
+                        const shadowC = sc + (Math.sign(col - sc) * (isLegal.stepCount - 1));
+                        enPassantTarget = { row: shadowR, col: shadowC, captureRow: row, captureCol: col, type: 'BP' };
+                    }
+
+                    if ((isWhite && row === 0) || (!isWhite && row === 15)) {
+                        board[row][col].type = '?'; promotionSquare = { row, col };
+                    }
+                }
+
+                piece.moves += 1;
+                
+                checkExecutioner(row, col);
+checkAlfilPromotion(row, col, capturedPiece);
+                checkAlibabaPromotion(row, col, capturedPiece);
+
+                selectedSquare = null; legalMoves = []; 
+
+if (typeof advanceTurnState === 'function') {
+    advanceTurnState();
+
+    // Don't update FEN while waiting for promotion.
+    if (!promotionSquare) {
+        updateFenConsole();
+    }
+}
+
+
+const opponentColor = isWhite ? 'black' : 'white';
+
+// If this move caused a promotion, wait until the player
+// chooses the promotion piece before checking the position.
+if (!promotionSquare) {
+    scanGameEndConditions(opponentColor);
+    appendStatusToLastMove();
+
+    // =========================================================
+    // MOVE / CAPTURE SOUND
+    // =========================================================
+    //
+    // Game-status sounds take priority over move sounds.
+    //
+
+    if (positionStatus === "inmate") {
+        // Checkmate sound already played by scanGameEndConditions().
+    } 
+    else if (positionStatus === "incheck") {
+        // Check sound already played by scanGameEndConditions().
+    } 
+    else if (positionStatus === "instale") {
+        // Stalemate sound already played by scanGameEndConditions().
+    } 
+    else if (capturedPiece) {
+        playCaptureSound();
+    } 
+    else if (isWhite) {
+        playWhiteMoveSound();
+    } 
+    else {
+        playBlackMoveSound();
+    }
+}
+
+drawBoard(); 
+return;
+            } else if (board[row][col] && board[row][col].color === board[selectedSquare.row][selectedSquare.col].color) {
+                if (typeof isCorrectTurn === 'function' && !isCorrectTurn(board[row][col].color)) return;
+    selectedSquare = { row, col };
+
+    if (turnRestrictedMode) {
+        legalMoves = getStrictlyLegalMoves(row, col);
+    } else {
+        legalMoves = getPseudoLegalMoves(row, col);
+    }
+
+    drawBoard(); 
+                return;
+            } else {
+                selectedSquare = null; legalMoves = []; drawBoard(); return;
+            }
+        } 
+        
+        if (board[row][col]) {
+            if (typeof isCorrectTurn === 'function' && !isCorrectTurn(board[row][col].color)) return;
+    selectedSquare = { row, col };
+
+    if (turnRestrictedMode) {
+        legalMoves = getStrictlyLegalMoves(row, col);
+    } else {
+        legalMoves = getPseudoLegalMoves(row, col);
+    }
+
+    drawBoard(); 
+        }
+    }
+
+    window.addEventListener('keydown', (event) => {
+        if (!promotionSquare) return;
+        const selectedType = promotionMap[event.key];
+        if (selectedType) {
+            const { row, col } = promotionSquare;
+            const playerColor = board[row][col].color;
+
+            if (selectedType === 'Am' && !amazonianUnlocked[playerColor]) {
+                alert(`❌ PROMOTION LOCKED!`);
+                return;
+            }
+
+board[row][col].type = selectedType; 
+promotionSquare = null; 
+playPromoteSound();
+
+// Add the promotion notation first.
+if (typeof appendPromotionToLastMove === 'function') {
+    appendPromotionToLastMove(selectedType);
+}
+
+const opponentColor = playerColor === 'white' ? 'black' : 'white';
+
+// Now that the pawn has become the actual promoted piece,
+// check whether the promotion caused check, mate, or stalemate.
+scanGameEndConditions(opponentColor);
+appendStatusToLastMove();
+
+drawBoard();
+            updateFenConsole(); 
+        }
+    });
+
+window.addEventListener('DOMContentLoaded', () => {
+    setupBoard();
+    drawBoard();
+    updateFenConsole(); 
+});
+
+</script>
+</body>
+</html>
