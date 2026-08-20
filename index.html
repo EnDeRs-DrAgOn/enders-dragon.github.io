@@ -224,6 +224,7 @@ body {
     </h2>
 </div>
     
+<<<<<<< HEAD
 <a href="https://github.com/EnDeRs-DrAgOn/enders-dragon.github.io"
    class="github-button"
    title="Open GitHub repository"
@@ -231,6 +232,9 @@ body {
    rel="noopener noreferrer">
     <img src="github.svg" alt="GitHub">
 </a>
+=======
+<div id="coord-toggle" class="coord-toggle-button" onclick="toggleCoordinates()" title="Toggle Board Coordinates">O</div>
+>>>>>>> f6d8f27c080ecb1843df978856e573d29861fa2b
 
 <button onclick="window.location.href='docs.html'" class="docs-button" title="Open Rules Guide">
     <img src="docs.png" alt="Rules Icon">
@@ -263,6 +267,24 @@ body {
 
 <script>
 
+<<<<<<< HEAD
+=======
+    let coordinatesVisible = true;
+
+function toggleCoordinates() {
+    coordinatesVisible = !coordinatesVisible;
+    const btn = document.getElementById('coord-toggle');
+    const boardEl = document.getElementById('board');
+
+    if (coordinatesVisible) {
+        btn.innerText = "O";
+        boardEl.classList.remove('coords-hidden');
+    } else {
+        btn.innerText = "I";
+        boardEl.classList.add('coords-hidden');
+    }
+}
+>>>>>>> f6d8f27c080ecb1843df978856e573d29861fa2b
     
     const boardSize = 16;
     let board = new Array(boardSize).fill(null).map(() => new Array(boardSize).fill(null));
